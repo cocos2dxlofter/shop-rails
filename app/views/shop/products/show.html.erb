@@ -21,10 +21,7 @@
   <strong>产品类别:</strong>
   <%= @shop_product.category.name %>
 </p>
-<p>
-  <strong>产品规格:</strong>
-  <%= @shop_product.spec %>
-</p>
+
 <% @shop_product.product_properties.each do |product_property| 
      next if product_property.property.nil?
 %>

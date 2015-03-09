@@ -14,12 +14,6 @@ module Shop::OrdersHelper
   #结算，选择收货地址、支付方式等
   def order_checkout    
 
-    if params[:require_openid] == '1' #在微信中通过网页授权接口获取openid
-       customer = Shop::Customer.where(id:session[:customer_id]).take if  session[:customer_id] 
-       customer = get_weixin_customer(customer) 
-       return if performed?   
-    end
-
   end
 
   #生成订单并使用支付
@@ -32,6 +26,12 @@ module Shop::OrdersHelper
     if cart.nil? || cart.items.size == 0
        render text: '购物车为空，不能创建订单'
        return
+    end
+
+    if params[:pay_way] == 'weixin'
+       customer = Shop::Customer.where(id:session[:customer_id]).take if  session[:customer_id] 
+       customer = get_weixin_customer(customer) 
+       return if performed?   #订单提交需要使用get方式，否则取openid跳转后，参数丢失
     end
 
     #计算折扣
@@ -168,23 +168,18 @@ module Shop::OrdersHelper
         app_id = @site.account.app_id  if  @site.account_id
         pay_sign_key= @site.account.pay_sign_key if  @site.account_id
         mch_id = @site.account.mch_id if  @site.account_id
-        if params[:trade_type] && params[:trade_type] == 'native'
-          package_params =  Utils::Wxpay.native(order.order_no,order.total_fee,subject,notify_url,order.customer.openid,
-                                               request.remote_ip,true,app_id,mch_id,pay_sign_key)
-        else
-          package_params =  Utils::Wxpay.jsapi2(order.order_no,order.total_fee,subject,notify_url,order.customer.openid,
-                                               request.remote_ip,app_id,mch_id,pay_sign_key)          
-        end
+
+        package_params =  Utils::Wxpay.jsapi2(order.order_no,order.total_fee,subject,notify_url,order.customer.openid,
+                                               request.remote_ip,app_id,mch_id,pay_sign_key)
         logger.debug("weixin pay package:" + package_params.to_s)
         render json: {is_success:"false",message:'订单支付失败，请联系网站管理员'} if package_params.nil?
         render json: {is_success:"true",package:package_params} unless package_params.nil?
-
       else
         render text: '支付失败，支付不方式不支持:' + params[:pay_way].to_s
     end
   end
 
-  #支付宝支付结果
+  #支付结果
   def order_pay_end
     # 提示当前订单的状态
     @is_paid = false

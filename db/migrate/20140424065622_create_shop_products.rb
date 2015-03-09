@@ -5,7 +5,6 @@ class CreateShopProducts < ActiveRecord::Migration
       t.references :account, index: true
       t.string :code
       t.references :category, index: true
-      t.string :spec
       t.integer :price
       t.integer :discount
       t.boolean :is_material

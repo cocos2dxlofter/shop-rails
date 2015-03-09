@@ -127,125 +127,6 @@ class Shop::ProductsController < ApplicationController
        redirect_to product, notice: '相关产品已删除.'    
   end  
 
-  # 产品批量修改(状态)
-  def batch
-     product_ids = []
-     product_ids = params[:product_ids] if params[:product_ids]
-     is_enabled = false
-     is_enabled = true if params[:is_enabled] == "1"
-     product_ids.each do |id|
-        product = Shop::Product.find(id)
-        product.is_enabled = is_enabled
-        product.save
-     end
-     redirect_to products_url, notice: '修改 ' + product_ids.size.to_s  + " 个产品"
-
-  end
-
-  # 产品导入
-  def import
-  end
-
-  # 使用exel文件批量导入产品数据
-  # 文件格式：类别编码  商品编码  商品名称  规格  零售价 数量  描述
-  def import_excel
-
-    if request.post?
-      if params[:excel_file] && File.extname(params[:excel_file].original_filename) == '.xls'
-        @errors = []
-
-        is_test = params[:commit] == "导入测试"
-        @workbook = Spreadsheet.open(params[:excel_file].path)
-        @worksheet = @workbook.worksheet(0)
-        logger.debug("worksheet 0: " + @worksheet.last_row_index.to_s )
-        i = 0;
-        1.upto @worksheet.last_row_index  do |index|
-          item = Shop::Product.new
-          row = @worksheet.row(index)
-
-          item.category = Shop::Category.find_by_code(row[0].strip) if row[0]
-          item.code = row[1].strip if row[1]          
-          item.name = row[2].strip if row[2]
-          item.spec = row[3].strip if row[3]
-          item.price = (row[4].to_f * 100).to_i
-          item.quantity = row[5].to_i
-          item.description  = row[6].strip if row[6]
-
-          item.the_order = 100
-          item.tag_order = 100             
-          item.transport_fee = 0    
-          item.discount = 100
-          item.is_recommend = false
-          item.is_enabled =false
-
-          is_error = false
-          error_info = ''
-          if item.code.nil? || Shop::Product.find_by_code(item.code)
-            error_info += "缺少产品编码;" if item.code.nil?
-            error_info += "产品编码[" + item.code + "]已存在;" unless item.code.nil?
-            is_error = true
-          end
-          if item.category.nil?
-            error_info += "类别编码[" + row[1] + "]不存在;" if row[1]
-            error_info += "缺少类别编码;" unless row[1]
-            is_error = true
-          end
-         
-          if is_error
-            @errors.push("第"+ index.to_s + " 行记录错误:" + error_info)
-            next
-          end
-          unless item.valid?
-            @errors.push("第"+ index.to_s + " 行记录错误:" + item.errors.full_messages.to_s)
-            next
-          end
-
-          logger.debug("row " + index.to_s + ":" + item.category.to_s)
-          item.save unless is_test
-          i = i + 1
-        end
-        notice = "共有 " + (@worksheet.last_row_index).to_s + " 条记录"
-        notice += ",已成功导入 " + i.to_s + " 条记录" unless is_test
-        notice += ",可以成功导入 " + i.to_s + " 条记录" if is_test
-        flash.now[:notice] = notice
-      else
-        flash.now[:error] = "没有上传excel文件或文件格式不对(只支持Excel 97/2000)"
-      end
-    end
-    render action: 'import'
-  end
-
-  # 批量导入图片
-  def import_images
-
-    image_file = params[:image_file]
-    file_name = image_file.original_filename
-    if Utils::FileUtil.image_file?(file_name)
-      code = file_name[0..file_name.index('.')-1]
-      code = file_name[0..file_name.index('-')-1] if file_name.index("-")
-      item = Shop::Product.where(code:code).take
-      if item.nil?
-        render json: {message:"没有找到对应的产品",name:file_name}
-        return      
-      end
-
-      picture = Shop::Picture.new
-      picture.path = Utils::FileUtil.upload(image_file)
-      picture.product = item
-      picture.save
-      Utils::FileUtil.thumb_image (Rails.root.join("public",picture.path).to_s) 
-
-      if item.picture.nil?
-        item.picture = picture
-        item.save
-      end
-      render json: {message:"上传成功",name:file_name}
-    else
-       render json: {message: "不是图片文件",name:file_name}
-    end
-
-  end 
-
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_shop_product
@@ -378,7 +259,7 @@ class Shop::ProductsController < ApplicationController
     end
     # Only allow a trusted parameter "white list" through.
     def shop_product_params
-      params.require(:product).permit(:name, :code, :category_id, :spec,:price_yuan, :discount, 
+      params.require(:product).permit(:name, :code, :category_id, :price_yuan, :discount, 
                                       :transport_fee_yuan,:quantity, :description,:the_order,
                                       :tag_order,:is_recommend,:is_enabled,{:tag_ids => []})
     end

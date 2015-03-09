@@ -14,8 +14,7 @@ module Shop
       session_key = @openid_key unless @openid_key.blank? #兼容微站多个站点共用组件      
       if @weixin_user.nil? && session[session_key].blank? #@weixin_user由微站框架提供，其他应用无此对象
           #render text:'请在微信中访问'
-          #开发环境使用默认openid，避免跳入微信环境 o6hyyjlRoyQelo6YgWstsRJjSBb8 (爱运动公众号openid)
-          #                                   oLJPFuPaNInbz4s8486pxoRiTSqk（浪花旅行公众号）
+          #开发环境使用默认openid，避免跳入微信环境 o6hyyjlRoyQelo6YgWstsRJjSBb8
           if Rails.env == 'development' 
              params[:openid] = 'oLJPFuPaNInbz4s8486pxoRiTSqk' if params[:openid].blank?
              logger.info("use default openid:" + params[:openid] + " for development")

@@ -28,10 +28,6 @@
     <%= f.label :code ,'产品编码'%>
     <%= f.text_field :code %>
   </div>
-  <div class="field">
-    <%= f.label :spec ,'产品规格'%>
-    <%= f.text_field :spec %>
-  </div>  
   <% @shop_properties.each do |property|
       field_name = "property_" + property.id.to_s
       field_name +="[]" if property.is_multiple

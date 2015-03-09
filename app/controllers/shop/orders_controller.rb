@@ -2,7 +2,7 @@ class Shop::OrdersController < ApplicationController
   before_action :set_shop_order, only: [:delivery,:show, :edit, :update, :destroy,
                                         :paid,:print,:email,:promotion]
   skip_before_filter :authorize,:verify_authenticity_token, only: [:add_to_cart,
-                     :remove_from_cart,:empty_cart,:change_product_quantity,:alipay_notify,:weixin_notify]
+                     :remove_from_cart,:empty_cart,:change_product_quantity,:alipay_notify]
   layout  false, only: [:add_to_cart,:remove_from_cart,:empty_cart,
                         :change_product_quantity,:alipay_notify,:print]
 
@@ -109,9 +109,7 @@ class Shop::OrdersController < ApplicationController
     # config.middleware.insert_after ActionDispatch::ParamsParser, ActionDispatch::XmlParamsParser    
 
     account_id = nil
-   # if !params[:site_key].blank? #兼容微站
-    if !params[:xml][:site_key].blank? && 
-       (Object.const_get("Site::Site").is_a?(Class) rescue false) #兼容微站
+    if !params[:site_key].blank? #兼容微站
        site = Site::Site.find_by_site_key(params[:site_key])
        pay_sign_key= site.account.pay_sign_key if  site.account_id
        account_id = site.account_id
@@ -122,8 +120,6 @@ class Shop::OrdersController < ApplicationController
 
     xml_sign = params[:xml][:sign]
     params[:xml][:sign] = ""
-    params[:xml][:site_key] = "" if params[:xml][:site_key] #非签名字段
-    
     logger.debug(params[:xml])
     notify_sign = Utils::Wxpay.pay_sign(params[:xml],pay_sign_key)
     logger.debug("notify_sign:" + notify_sign)

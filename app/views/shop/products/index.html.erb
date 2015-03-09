@@ -3,8 +3,7 @@
 <div class="row">
 <div class="col-sm-4">
 <h1>产品列表
- <small><%= link_to '新建产品', shop.new_product_path ,:class => "btn btn-primary" %>
-        <%= link_to '批量导入', shop.products_import_path ,:class => "btn btn-success" %></small>
+ <small><%= link_to '新建产品', shop.new_product_path ,:class => "btn btn-primary" %></small>
 </h1>
 </div>
   <div class="col-sm-2" style="margin-top: 30px;margin-bottom: 0px;padding-left: 80px;line-height:34px;">
@@ -32,17 +31,12 @@
   <%= flash[:notice] %><%= flash[:error] %>
 </div>
 <% end %>
-
-<%= form_tag shop.products_batch_path do %>  
-<%= hidden_field_tag :is_enabled, "1" %>
 <table class="table table-striped table-bordered table-condensed">
   <thead>
     <tr>
-      <th><%= check_box_tag 'check_all', '', false %>选中全部</th>
       <th>产品名称</th>
       <th>产品编码</th>
       <th>产品类别</th>
-      <th>产品规格</th>      
       <th>SKU属性</th>      
       <th>产品价格</th>
       <th>产品数量</th>
@@ -60,14 +54,10 @@
   <tbody>
     <% @shop_products.each do |shop_product| %>
       <tr>
-       <td>
-       <%= check_box_tag 'product_ids[]', shop_product.id, false ,:class=>'product_ids'%>
-       </td>
         <td><%= shop_product.name %></td>
         <td><%= shop_product.code %></td>
         <td><%= shop_product.category.name %></td>
-        <td><%= shop_product.spec %></td>
-        <td><%= shop_product.sku_properties_list %></td>        
+        <td><%= shop_product.sku_properties_list %></td>
         <td><%= shop_product.price_yuan %>元</td>
         <td><%= shop_product.quantity %></td>        
         <td><%= thumbnail shop_product.picture.path if shop_product.picture %></td>
@@ -82,12 +72,6 @@
     <% end %>
   </tbody>
 </table>
-<div >     
-     <%= button_tag "设置为可用" , :class => "btn btn-success",:id => "enable_button" %>
-     <%= button_tag "设置为不可用" ,:class => "btn btn-default active",:id => "disable_button"%>
-  </div>
-<% end %>
-
 <div class="apple_pagination">
  <%= page_entries_info @shop_products %>
  <%= will_paginate @shop_products ,:container => false%>
@@ -101,16 +85,5 @@
          $("#name").val("");
          $("#search_form").submit();
       });
-
-     $('#check_all').click(function () {
-        is_checked = this.checked;
-        $(".product_ids").each(function(){ this.checked = is_checked; });
-      });
-      $('#enable_button').click(function () {
-         $("#is_enabled").val("1");
-       });
-       $('#disable_button').click(function () {
-         $("#is_enabled").val("0");
-       });
   });
 </script>

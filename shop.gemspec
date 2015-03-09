@@ -20,10 +20,6 @@ Gem::Specification.new do |s|
   s.add_dependency "will_paginate", "~> 3.0"
   
   s.add_dependency "utils", ">= 1.0.0"
-  
-  s.add_dependency "mini_magick"
-  s.add_dependency "spreadsheet"
-  s.add_dependency "jquery-fileupload-rails"
 
   s.add_development_dependency "sqlite3"
 end
