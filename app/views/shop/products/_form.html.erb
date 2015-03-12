@@ -76,6 +76,10 @@
     <% end %>
   </div>
   <div class="field">
+    <%= f.label :price_yuan ,'特价'%>
+    <%= f.number_field :price_yuan ,:step => 0.01 %>元
+  </div>
+  <div class="field">
     <%= f.label :discount ,'产品折扣'%>
     <%= f.number_field :discount %> %
   </div>
