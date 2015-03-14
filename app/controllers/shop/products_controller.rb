@@ -261,6 +261,6 @@ class Shop::ProductsController < ApplicationController
     def shop_product_params
       params.require(:product).permit(:name, :code, :category_id, :price_yuan, :discount, 
                                       :transport_fee_yuan,:quantity, :description,:the_order,
-                                      :tag_order,:is_recommend,:is_enabled,:finalsale,{:tag_ids => []})
+                                      :tag_order,:is_recommend,:is_enabled,:finalsale_yuan,{:tag_ids => []})
     end
 end
