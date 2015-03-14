@@ -1,4 +1,5 @@
 class Shop::Product < ActiveRecord::Base
+  attr_accessible :finalsale
   validates_presence_of :name,:category,:code
   validates :code,uniqueness: { scope: :account_id, message: "产品编码不可重复" }
   validates :code, format: { with: /\A[A-Z0-9\-_]+\z/,message: "编码只能是大写字母、数字、横线、下划线" }
