@@ -89,7 +89,14 @@ class Shop::Product < ActiveRecord::Base
   end
   def price_yuan=(value)
     self.price = (value.to_f * 100).round
-  end  
+  end
+  
+  def finalsale_yuan
+      format("%.2f",self.finalsale.to_i / 100.00)
+  end
+  def finalsale_yuan=(value)
+      self.finalsale = (value.to_f * 100).round
+  end
 
   def transport_fee_yuan
     format("%.2f",self.transport_fee.to_i / 100.00)    
